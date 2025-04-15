@@ -24,59 +24,6 @@ class Database:
         Establecer conexión a la base de datos
         
         Returns:
-            Diccionario con el resultado o None si no hay resultados
-        """
-        try:
-            if params:
-                self.cursor.execute(query, params)
-            else:
-                self.cursor.execute(query)
-            
-            row = self.cursor.fetchone()
-            
-            if row:
-                return dict(row)
-            return None
-        except Exception as e:
-            self.logger.error(f"Error al ejecutar consulta: {e}\nQuery: {query}\nParams: {params}")
-            raise
-    
-    def fetch_all(self, query, params=None):
-        """
-        Ejecutar una consulta SQL y obtener todos los resultados
-        
-        Args:
-            query: Consulta SQL
-            params: Parámetros para la consulta (opcional)
-            
-        Returns:
-            Lista de diccionarios con los resultados
-        """
-        try:
-            if params:
-                self.cursor.execute(query, params)
-            else:
-                self.cursor.execute(query)
-            
-            rows = self.cursor.fetchall()
-            
-            # Convertir cada fila a diccionario
-            return [dict(row) for row in rows]
-        except Exception as e:
-            self.logger.error(f"Error al ejecutar consulta: {e}\nQuery: {query}\nParams: {params}")
-            raise
-    
-    def begin_transaction(self):
-        """Iniciar una transacción"""
-        self.conn.execute("BEGIN TRANSACTION")
-    
-    def commit_transaction(self):
-        """Confirmar una transacción"""
-        self.conn.commit()
-    
-    def rollback_transaction(self):
-        """Revertir una transacción"""
-        self.conn.rollback():
             True si se conectó correctamente, False en caso contrario
         """
         try:
@@ -321,4 +268,57 @@ class Database:
             query: Consulta SQL
             params: Parámetros para la consulta (opcional)
             
-        Returns
+        Returns:
+            Diccionario con el resultado o None si no hay resultados
+        """
+        try:
+            if params:
+                self.cursor.execute(query, params)
+            else:
+                self.cursor.execute(query)
+            
+            row = self.cursor.fetchone()
+            
+            if row:
+                return dict(row)
+            return None
+        except Exception as e:
+            self.logger.error(f"Error al ejecutar consulta: {e}\nQuery: {query}\nParams: {params}")
+            raise
+    
+    def fetch_all(self, query, params=None):
+        """
+        Ejecutar una consulta SQL y obtener todos los resultados
+        
+        Args:
+            query: Consulta SQL
+            params: Parámetros para la consulta (opcional)
+            
+        Returns:
+            Lista de diccionarios con los resultados
+        """
+        try:
+            if params:
+                self.cursor.execute(query, params)
+            else:
+                self.cursor.execute(query)
+            
+            rows = self.cursor.fetchall()
+            
+            # Convertir cada fila a diccionario
+            return [dict(row) for row in rows]
+        except Exception as e:
+            self.logger.error(f"Error al ejecutar consulta: {e}\nQuery: {query}\nParams: {params}")
+            raise
+    
+    def begin_transaction(self):
+        """Iniciar una transacción"""
+        self.conn.execute("BEGIN TRANSACTION")
+    
+    def commit_transaction(self):
+        """Confirmar una transacción"""
+        self.conn.commit()
+    
+    def rollback_transaction(self):
+        """Revertir una transacción"""
+        self.conn.rollback()

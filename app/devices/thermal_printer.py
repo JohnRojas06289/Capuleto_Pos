@@ -590,4 +590,143 @@ class ThermalPrinter:
             # Si estamos usando python-escpos
             if self.printer and self.connection_type != 'cups':
                 self.printer.cashdraw(2)
-                self.logger.info("Comando para
+                self.logger.info("Comando para abrir cajón enviado usando ESC/POS")
+                return True
+            
+            # Si estamos usando CUPS
+            elif self.connection_type == 'cups' and self.printer_name:
+                # Comando ESC/POS para abrir el cajón (pulse pin 2)
+                # ESC p m t1 t2 - donde m es el pin (0 o 1), t1 y t2 son tiempos
+                drawer_command = b'\x1B\x70\x00\x19\x19'  # 25ms de pulso en pin 0
+                
+                # Crear archivo temporal con el comando
+                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                temp_file = f"/tmp/pos_drawer_{timestamp}.bin"
+                
+                with open(temp_file, 'wb') as f:
+                    f.write(drawer_command)
+                
+                # Enviar comando a la impresora
+                conn = cups.Connection()
+                job_id = conn.printFile(
+                    self.printer_name,
+                    temp_file,
+                    "Abrir cajón",
+                    {"raw": "true"}  # Importante: enviar como comando raw
+                )
+                
+                # Eliminar archivo temporal
+                os.unlink(temp_file)
+                
+                if job_id:
+                    self.logger.info(f"Comando para abrir cajón enviado usando CUPS - Job ID: {job_id}")
+                    return True
+                else:
+                    self.logger.error("Error al enviar comando para abrir cajón usando CUPS")
+                    return False
+            else:
+                self.logger.error("No se puede abrir el cajón: impresora no configurada")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Error al abrir cajón de dinero: {e}")
+            return False
+    
+    def cut_paper(self):
+        """
+        Cortar papel
+        
+        Returns:
+            True si se envió el comando correctamente, False en caso contrario
+        """
+        try:
+            # Si estamos usando python-escpos
+            if self.printer and self.connection_type != 'cups':
+                self.printer.cut()
+                self.logger.info("Comando para cortar papel enviado usando ESC/POS")
+                return True
+            
+            # Si estamos usando CUPS
+            elif self.connection_type == 'cups' and self.printer_name:
+                # Comando ESC/POS para cortar papel
+                cut_command = b'\x1D\x56\x41\x00'  # GS V A 0 - corte completo
+                
+                # Crear archivo temporal con el comando
+                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                temp_file = f"/tmp/pos_cut_{timestamp}.bin"
+                
+                with open(temp_file, 'wb') as f:
+                    f.write(cut_command)
+                
+                # Enviar comando a la impresora
+                conn = cups.Connection()
+                job_id = conn.printFile(
+                    self.printer_name,
+                    temp_file,
+                    "Cortar papel",
+                    {"raw": "true"}  # Importante: enviar como comando raw
+                )
+                
+                # Eliminar archivo temporal
+                os.unlink(temp_file)
+                
+                if job_id:
+                    self.logger.info(f"Comando para cortar papel enviado usando CUPS - Job ID: {job_id}")
+                    return True
+                else:
+                    self.logger.error("Error al enviar comando para cortar papel usando CUPS")
+                    return False
+            else:
+                self.logger.error("No se puede cortar papel: impresora no configurada")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Error al cortar papel: {e}")
+            return False
+    
+    def get_status(self):
+        """
+        Obtener estado de la impresora
+        
+        Returns:
+            Diccionario con el estado de la impresora o None si no se pudo obtener
+        """
+        try:
+            if self.connection_type == 'cups' and self.printer_name:
+                conn = cups.Connection()
+                printers = conn.getPrinters()
+                
+                if self.printer_name in printers:
+                    printer_info = printers[self.printer_name]
+                    
+                    # Obtener trabajos de impresión pendientes
+                    jobs = conn.getJobs(which_jobs='not-completed')
+                    printer_jobs = [j for j in jobs.values() if j['printer'] == self.printer_name]
+                    
+                    status = {
+                        'name': self.printer_name,
+                        'state': printer_info.get('printer-state', 0),
+                        'state_message': printer_info.get('printer-state-message', ''),
+                        'is_accepting_jobs': printer_info.get('printer-is-accepting-jobs', True),
+                        'is_shared': printer_info.get('printer-is-shared', False),
+                        'pending_jobs': len(printer_jobs),
+                        'connection_type': 'cups'
+                    }
+                    
+                    return status
+                else:
+                    self.logger.error(f"Impresora no encontrada en CUPS: {self.printer_name}")
+                    return None
+            
+            # Para conexiones directas, no podemos obtener estado detallado fácilmente
+            elif self.printer and self.connection_type != 'cups':
+                return {
+                    'connection_type': self.connection_type,
+                    'is_connected': True
+                }
+            
+            return None
+            
+        except Exception as e:
+            self.logger.error(f"Error al obtener estado de la impresora: {e}")
+            return None

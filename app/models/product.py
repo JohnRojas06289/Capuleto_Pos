@@ -315,3 +315,97 @@ class Product:
         Obtener una categoría por su ID
         
         Args:
+            category_id: ID de la categoría
+            
+        Returns:
+            Diccionario con datos de la categoría o None si no existe
+        """
+        query = """
+            SELECT c.*, 
+                   (SELECT COUNT(*) FROM products p WHERE p.category_id = c.category_id) as product_count
+            FROM categories c
+            WHERE c.category_id = ?
+        """
+        
+        return self.db.fetch_one(query, [category_id])
+    
+    def create_category(self, name, description=None):
+        """
+        Crear una nueva categoría
+        
+        Args:
+            name: Nombre de la categoría
+            description: Descripción (opcional)
+            
+        Returns:
+            ID de la categoría creada o None si hay error
+        """
+        query = """
+            INSERT INTO categories (name, description)
+            VALUES (?, ?)
+        """
+        
+        params = [name, description]
+        
+        return self.db.execute(query, params)
+    
+    def update_category(self, category_id, name=None, description=None):
+        """
+        Actualizar una categoría existente
+        
+        Args:
+            category_id: ID de la categoría
+            name: Nuevo nombre (opcional)
+            description: Nueva descripción (opcional)
+            
+        Returns:
+            True si se actualizó correctamente, False en caso contrario
+        """
+        # Obtener datos actuales
+        category = self.get_category_by_id(category_id)
+        if not category:
+            return False
+            
+        # Usar valores actuales si no se proporcionan nuevos
+        name = name if name is not None else category['name']
+        description = description if description is not None else category['description']
+        
+        query = """
+            UPDATE categories
+            SET name = ?, description = ?
+            WHERE category_id = ?
+        """
+        
+        params = [name, description, category_id]
+        
+        return self.db.execute(query, params) > 0
+    
+    def delete_category(self, category_id):
+        """
+        Eliminar una categoría
+        
+        Args:
+            category_id: ID de la categoría
+            
+        Returns:
+            True si se eliminó correctamente, False en caso contrario
+        """
+        # Verificar si hay productos en esta categoría
+        product_count_query = """
+            SELECT COUNT(*) as count
+            FROM products
+            WHERE category_id = ?
+        """
+        
+        result = self.db.fetch_one(product_count_query, [category_id])
+        if result and result['count'] > 0:
+            return False  # No se puede eliminar si tiene productos asociados
+            
+        query = """
+            DELETE FROM categories
+            WHERE category_id = ?
+        """
+        
+        params = [category_id]
+        
+        return self.db.execute(query, params) > 0

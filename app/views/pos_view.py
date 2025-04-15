@@ -360,7 +360,7 @@ class POSView(QMainWindow):
         for row in range(self.cart_table.rowCount()):
             # Obtener el texto del subtotal y convertirlo a número
             subtotal_text = self.cart_table.item(row, 3).text()
-            if subtotal_text.startswith('):
+            if subtotal_text.startswith('$'):
                 subtotal_text = subtotal_text[1:]  # Quitar el símbolo $
             
             subtotal += float(subtotal_text)
@@ -408,7 +408,7 @@ class PaymentDialog(QDialog):
         self.total = total
         
         # Eliminar el símbolo $ y convertir a float
-        self.total_value = float(total.replace(', ''))
+        self.total_value = float(total.replace('$', ''))
         
         # Configurar la interfaz
         self.setup_ui()
@@ -530,51 +530,3 @@ class PaymentDialog(QDialog):
         # Ocultar todos los frames
         self.cash_frame.setVisible(False)
         self.card_frame.setVisible(False)
-        self.transfer_frame.setVisible(False)
-        
-        # Mostrar el frame correspondiente
-        if index == 0:  # Efectivo
-            self.cash_frame.setVisible(True)
-        elif index == 1:  # Tarjeta
-            self.card_frame.setVisible(True)
-        elif index == 2:  # Transferencia
-            self.transfer_frame.setVisible(True)
-    
-    def _calculate_change(self):
-        """Calcular el cambio a devolver"""
-        try:
-            amount = float(self.amount_input.text())
-            change = amount - self.total_value
-            
-            if change >= 0:
-                self.change_value.setText(f"${change:.2f}")
-                self.change_value.setStyleSheet("font-size: 14pt; font-weight: bold; color: black;")
-            else:
-                self.change_value.setText("Monto insuficiente")
-                self.change_value.setStyleSheet("font-size: 14pt; font-weight: bold; color: red;")
-        except ValueError:
-            self.change_value.setText("$0.00")
-    
-    def get_payment_data(self):
-        """Obtener los datos del pago"""
-        method = self.payment_method.currentText()
-        payment_data = {
-            'method': method
-        }
-        
-        if method == "Efectivo":
-            payment_data['amount_received'] = self.amount_input.text()
-            change_text = self.change_value.text()
-            if change_text.startswith('):
-                payment_data['change'] = change_text
-            else:
-                payment_data['change'] = "$0.00"
-        
-        elif method == "Tarjeta":
-            payment_data['card_number'] = self.card_number_input.text()
-            payment_data['auth_code'] = self.auth_code_input.text()
-        
-        elif method == "Transferencia":
-            payment_data['reference'] = self.reference_input.text()
-        
-        return payment_data
