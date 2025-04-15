@@ -1,0 +1,39 @@
+{
+    "store_name": "Mi Tienda",
+    "store_address": "Calle Principal #123",
+    "store_phone": "123-456-7890",
+    "tax_rate": 0.16,
+    "currency_symbol": "$",
+    "database_path": "database/pos_database.db",
+    "language": "es",
+    "theme": "light",
+    "receipt_header": "MI TIENDA\nCalle Principal #123\nTel: 123-456-7890",
+    "receipt_footer": "¡Gracias por su compra!\nVuelva pronto",
+    "backup_path": "backups",
+    "auto_backup": true,
+    "backup_frequency": "daily",
+    "log_level": "INFO",
+    "printer": {
+        "enabled": true,
+        "name": "WPRP-260",
+        "paper_width": 58
+    },
+    "cash_drawer": {
+        "enabled": true,
+        "open_automatically": true
+    },
+    "barcode_scanner": {
+        "enabled": true,
+        "prefix": "",
+        "suffix": ""
+    },
+    "security": {
+        "session_timeout": 30,
+        "password_expiry_days": 90,
+        "min_password_length": 8
+    },
+    "display": {
+        "show_stock_warnings": true,
+        "items_per_page": 20
+    }
+}

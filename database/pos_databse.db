@@ -1,0 +1,114 @@
+-- Tabla de usuarios
+CREATE TABLE users (
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,  -- Almacenar como hash
+    full_name TEXT NOT NULL,
+    role TEXT NOT NULL,  -- 'admin', 'cashier', etc.
+    is_active BOOLEAN DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP
+);
+
+-- Tabla de categorías de productos
+CREATE TABLE categories (
+    category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT
+);
+
+-- Tabla de productos
+CREATE TABLE products (
+    product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    barcode TEXT UNIQUE,
+    name TEXT NOT NULL,
+    description TEXT,
+    category_id INTEGER,
+    price DECIMAL(10,2) NOT NULL,
+    cost DECIMAL(10,2),
+    stock_quantity INTEGER DEFAULT 0,
+    min_stock_level INTEGER DEFAULT 5,
+    is_active BOOLEAN DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);
+
+-- Tabla de ventas (cabecera)
+CREATE TABLE sales (
+    sale_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    customer_name TEXT,
+    total_amount DECIMAL(10,2) NOT NULL,
+    tax_amount DECIMAL(10,2) DEFAULT 0,
+    discount_amount DECIMAL(10,2) DEFAULT 0,
+    payment_method TEXT NOT NULL,  -- 'cash', 'card', etc.
+    payment_status TEXT NOT NULL,  -- 'paid', 'pending', 'canceled'
+    sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Tabla de detalles de venta (líneas)
+CREATE TABLE sale_items (
+    item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sale_id INTEGER NOT NULL,
+    product_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    discount DECIMAL(10,2) DEFAULT 0,
+    subtotal DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (sale_id) REFERENCES sales(sale_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+-- Tabla de inventario (movimientos)
+CREATE TABLE inventory_movements (
+    movement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    movement_type TEXT NOT NULL,  -- 'purchase', 'sale', 'adjustment', 'return'
+    quantity INTEGER NOT NULL,  -- Positivo para entradas, negativo para salidas
+    reference_id INTEGER,  -- ID de la venta o compra relacionada
+    movement_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT,
+    FOREIGN KEY (product_id) REFERENCES products(product_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Tabla de caja (apertura/cierre)
+CREATE TABLE cash_registers (
+    register_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    opening_amount DECIMAL(10,2) NOT NULL,
+    closing_amount DECIMAL(10,2),
+    cash_sales DECIMAL(10,2) DEFAULT 0,
+    card_sales DECIMAL(10,2) DEFAULT 0,
+    other_sales DECIMAL(10,2) DEFAULT 0,
+    opening_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    closing_time TIMESTAMP,
+    notes TEXT,
+    status TEXT NOT NULL,  -- 'open', 'closed'
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+-- Tabla de configuración del sistema
+CREATE TABLE system_config (
+    config_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    config_key TEXT NOT NULL UNIQUE,
+    config_value TEXT NOT NULL,
+    description TEXT
+);
+
+-- Insertar configuración inicial
+INSERT INTO system_config (config_key, config_value, description) VALUES
+('store_name', 'Mi Tienda', 'Nombre del negocio'),
+('store_address', 'Dirección #123', 'Dirección del negocio'),
+('store_phone', '123-456-7890', 'Teléfono del negocio'),
+('tax_rate', '0.16', 'Tasa de impuesto por defecto (IVA)'),
+('printer_model', 'WPRP-260', 'Modelo de impresora'),
+('currency_symbol', '$', 'Símbolo de moneda');
+
+-- Insertar usuario administrador por defecto
+INSERT INTO users (username, password, full_name, role) VALUES
+('admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Administrador', 'admin');  -- Contraseña: admin

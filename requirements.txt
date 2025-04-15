@@ -1,0 +1,31 @@
+# Requisitos para el sistema POS
+
+# Interfaz gráfica
+PySide6>=6.4.0
+
+# Base de datos
+# sqlite3 viene incluido con Python
+
+# Controladores de dispositivos
+pyusb>=1.2.1
+pyserial>=3.5
+python-escpos>=3.0
+pycups>=2.0.1
+
+# Procesamiento de datos
+pandas>=1.5.0
+
+# Gráficos para reportes
+matplotlib>=3.6.0
+
+# Utilidades generales
+python-dateutil>=2.8.2
+pyyaml>=6.0
+
+# Pruebas
+pytest>=7.0.0
+pytest-qt>=4.1.0
+
+# Desarrollo
+black>=22.8.0
+flake8>=5.0.4
