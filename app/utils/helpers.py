@@ -20,144 +20,6 @@ def format_currency(amount, symbol='$'):
         symbol: Símbolo de moneda
         
     Returns:
-        True si coincide, False en caso contrario
-    """
-    if not password or not password_hash:
-        return False
-        
-    # Generar hash de la contraseña a verificar
-    check_hash = hash_password(password)
-    
-    # Comparar los hashes
-    return check_hash == password_hash
-
-def truncate_text(text, max_length=50, suffix='...'):
-    """
-    Truncar un texto si excede una longitud máxima
-    
-    Args:
-        text: Texto a truncar
-        max_length: Longitud máxima permitida
-        suffix: Sufijo a agregar si se trunca
-        
-    Returns:
-        Texto truncado
-    """
-    if not text:
-        return ''
-        
-    if len(text) <= max_length:
-        return text
-        
-    return text[:max_length - len(suffix)] + suffix
-
-def get_app_version():
-    """
-    Obtener la versión de la aplicación
-    
-    Returns:
-        String con la versión
-    """
-    try:
-        # Intentar leer desde el módulo principal
-        from app import __version__
-        return __version__
-    except ImportError:
-        # Valor por defecto
-        return '1.0.0'
-
-def bytes_to_human_readable(size_bytes):
-    """
-    Convertir bytes a formato legible para humanos
-    
-    Args:
-        size_bytes: Tamaño en bytes
-        
-    Returns:
-        String con formato legible (KB, MB, GB, etc.)
-    """
-    if size_bytes <= 0:
-        return "0B"
-    
-    units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
-    i = 0
-    while size_bytes >= 1024 and i < len(units) - 1:
-        size_bytes /= 1024.0
-        i += 1
-    
-    return f"{size_bytes:.2f}{units[i]}"
-
-def sanitize_filename(filename):
-    """
-    Sanear un nombre de archivo quitando caracteres no permitidos
-    
-    Args:
-        filename: Nombre de archivo original
-        
-    Returns:
-        Nombre de archivo saneado
-    """
-    # Eliminar caracteres no permitidos
-    sanitized = re.sub(r'[<>:"/\\|?*]', '', filename)
-    # Reemplazar espacios por guiones bajos
-    sanitized = sanitized.replace(' ', '_')
-    # Asegurarse de que no sea demasiado largo
-    if len(sanitized) > 255:
-        sanitized = sanitized[:250] + '...'
-    return sanitized
-
-def is_valid_path(path):
-    """
-    Verificar si una ruta es válida
-    
-    Args:
-        path: Ruta a verificar
-        
-    Returns:
-        True si es válida, False en caso contrario
-    """
-    try:
-        # Verificar si la ruta es absoluta
-        is_absolute = os.path.isabs(path)
-        
-        # Verificar si el directorio padre existe
-        parent = os.path.dirname(path)
-        parent_exists = os.path.exists(parent) if parent else True
-        
-        # Verificar si tiene caracteres válidos
-        is_valid_chars = os.path.normpath(path) == path
-        
-        return is_absolute and parent_exists and is_valid_chars
-    except:
-        return False
-
-def generate_random_password(length=8):
-    """
-    Generar una contraseña aleatoria
-    
-    Args:
-        length: Longitud de la contraseña
-        
-    Returns:
-        Contraseña generada
-    """
-    # Asegurar que tenga al menos un carácter de cada tipo
-    lowercase = random.choice(string.ascii_lowercase)
-    uppercase = random.choice(string.ascii_uppercase)
-    digit = random.choice(string.digits)
-    special = random.choice('!@#$%&*+-')
-    
-    # Generar el resto de caracteres aleatorios
-    remaining_length = length - 4
-    all_chars = string.ascii_letters + string.digits + '!@#$%&*+-'
-    remaining = ''.join(random.choice(all_chars) for _ in range(remaining_length))
-    
-    # Combinar todos los caracteres y mezclarlos
-    password = lowercase + uppercase + digit + special + remaining
-    password_list = list(password)
-    random.shuffle(password_list)
-    
-    return ''.join(password_list)
         String con el valor formateado como moneda
     """
     try:
@@ -445,4 +307,142 @@ def verify_password(password, password_hash):
         password: Contraseña en texto claro
         password_hash: Hash de la contraseña
         
-    Returns
+    Returns:
+        True si coincide, False en caso contrario
+    """
+    if not password or not password_hash:
+        return False
+        
+    # Generar hash de la contraseña a verificar
+    check_hash = hash_password(password)
+    
+    # Comparar los hashes
+    return check_hash == password_hash
+
+def truncate_text(text, max_length=50, suffix='...'):
+    """
+    Truncar un texto si excede una longitud máxima
+    
+    Args:
+        text: Texto a truncar
+        max_length: Longitud máxima permitida
+        suffix: Sufijo a agregar si se trunca
+        
+    Returns:
+        Texto truncado
+    """
+    if not text:
+        return ''
+        
+    if len(text) <= max_length:
+        return text
+        
+    return text[:max_length - len(suffix)] + suffix
+
+def get_app_version():
+    """
+    Obtener la versión de la aplicación
+    
+    Returns:
+        String con la versión
+    """
+    try:
+        # Intentar leer desde el módulo principal
+        from app import __version__
+        return __version__
+    except ImportError:
+        # Valor por defecto
+        return '1.0.0'
+
+def bytes_to_human_readable(size_bytes):
+    """
+    Convertir bytes a formato legible para humanos
+    
+    Args:
+        size_bytes: Tamaño en bytes
+        
+    Returns:
+        String con formato legible (KB, MB, GB, etc.)
+    """
+    if size_bytes <= 0:
+        return "0B"
+    
+    units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+    i = 0
+    while size_bytes >= 1024 and i < len(units) - 1:
+        size_bytes /= 1024.0
+        i += 1
+    
+    return f"{size_bytes:.2f}{units[i]}"
+
+def sanitize_filename(filename):
+    """
+    Sanear un nombre de archivo quitando caracteres no permitidos
+    
+    Args:
+        filename: Nombre de archivo original
+        
+    Returns:
+        Nombre de archivo saneado
+    """
+    # Eliminar caracteres no permitidos
+    sanitized = re.sub(r'[<>:"/\\|?*]', '', filename)
+    # Reemplazar espacios por guiones bajos
+    sanitized = sanitized.replace(' ', '_')
+    # Asegurarse de que no sea demasiado largo
+    if len(sanitized) > 255:
+        sanitized = sanitized[:250] + '...'
+    return sanitized
+
+def is_valid_path(path):
+    """
+    Verificar si una ruta es válida
+    
+    Args:
+        path: Ruta a verificar
+        
+    Returns:
+        True si es válida, False en caso contrario
+    """
+    try:
+        # Verificar si la ruta es absoluta
+        is_absolute = os.path.isabs(path)
+        
+        # Verificar si el directorio padre existe
+        parent = os.path.dirname(path)
+        parent_exists = os.path.exists(parent) if parent else True
+        
+        # Verificar si tiene caracteres válidos
+        is_valid_chars = os.path.normpath(path) == path
+        
+        return is_absolute and parent_exists and is_valid_chars
+    except:
+        return False
+
+def generate_random_password(length=8):
+    """
+    Generar una contraseña aleatoria
+    
+    Args:
+        length: Longitud de la contraseña
+        
+    Returns:
+        Contraseña generada
+    """
+    # Asegurar que tenga al menos un carácter de cada tipo
+    lowercase = random.choice(string.ascii_lowercase)
+    uppercase = random.choice(string.ascii_uppercase)
+    digit = random.choice(string.digits)
+    special = random.choice('!@#$%&*+-')
+    
+    # Generar el resto de caracteres aleatorios
+    remaining_length = length - 4
+    all_chars = string.ascii_letters + string.digits + '!@#$%&*+-'
+    remaining = ''.join(random.choice(all_chars) for _ in range(remaining_length))
+    
+    # Combinar todos los caracteres y mezclarlos
+    password = lowercase + uppercase + digit + special + remaining
+    password_list = list(password)
+    random.shuffle(password_list)
+    
+    return ''.join(password_list)

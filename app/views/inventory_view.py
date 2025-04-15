@@ -87,7 +87,7 @@ class InventoryView(QWidget):
         self.category_filter_combo.addItem("Alimentos", 2)
         self.category_filter_combo.addItem("Limpieza", 3)
         
-self.category_filter_combo.currentIndexChanged.connect(self.filter_products)
+        self.category_filter_combo.currentIndexChanged.connect(self.filter_products)
         
         category_layout.addWidget(category_label)
         category_layout.addWidget(self.category_filter_combo)
@@ -605,7 +605,130 @@ self.category_filter_combo.currentIndexChanged.connect(self.filter_products)
         stock_input.setMinimum(0)
         stock_input.setMaximum(99999)
         
-      min_stock_input = QSpinBox()
+        min_stock_input = QSpinBox()
+        min_stock_input.setMinimum(1)
+        min_stock_input.setMaximum(999)
+        min_stock_input.setValue(5)  # Valor por defecto
+        
+        form_layout.addRow("Código de barras:", barcode_input)
+        form_layout.addRow("Nombre:", name_input)
+        form_layout.addRow("Descripción:", description_input)
+        form_layout.addRow("Categoría:", category_combo)
+        form_layout.addRow("Precio de venta:", price_input)
+        form_layout.addRow("Costo:", cost_input)
+        form_layout.addRow("Stock inicial:", stock_input)
+        form_layout.addRow("Stock mínimo:", min_stock_input)
+        
+        layout.addLayout(form_layout)
+        
+        # Botones
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        
+        layout.addWidget(buttons)
+
+        # Mostrar diálogo
+        if dialog.exec() == QDialog.Accepted:
+            # Verificar campos obligatorios
+            if not name_input.text():
+                QMessageBox.warning(self, "Error", "El nombre del producto es obligatorio")
+                return
+
+            if price_input.value() == 0:
+                QMessageBox.warning(self, "Error", "El precio de venta debe ser mayor que cero")
+                return
+
+            # Crear producto
+            product_data = {
+                "barcode": barcode_input.text(),
+                "name": name_input.text(),
+                "description": description_input.text(),
+                "category_id": category_combo.currentData(),
+                "price": price_input.value(),
+                "cost": cost_input.value(),
+                "stock_quantity": stock_input.value(),
+                "min_stock_level": min_stock_input.value()
+            }
+
+            # Emitir señal (en un sistema real, esto invocaría al controlador)
+            self.product_created.emit(product_data)
+
+            # Para demostración, recargar los productos
+            self.load_sample_products()
+
+            QMessageBox.information(self, "Producto Creado", f"Producto '{product_data['name']}' creado correctamente")
+    
+    def show_edit_product_dialog(self, product_id):
+        """
+        Mostrar diálogo para editar un producto existente
+        
+        Args:
+            product_id: ID del producto a editar
+        """
+        # En un sistema real, obtendríamos los datos del producto desde el controlador
+        # Para demostración, usamos datos de ejemplo
+        product_data = None
+        for row in range(self.products_table.rowCount()):
+            if int(self.products_table.item(row, 0).text()) == product_id:
+                product_data = {
+                    "product_id": product_id,
+                    "barcode": self.products_table.item(row, 1).text(),
+                    "name": self.products_table.item(row, 2).text(),
+                    "category": self.products_table.item(row, 3).text(),
+                    "price": float(self.products_table.item(row, 4).text().replace('$', '')),
+                    "cost": float(self.products_table.item(row, 5).text().replace('$', '')),
+                    "stock_quantity": int(self.products_table.item(row, 6).text())
+                }
+                break
+                
+        if not product_data:
+            QMessageBox.warning(self, "Error", f"Producto con ID {product_id} no encontrado")
+            return
+            
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"Editar Producto: {product_data['name']}")
+        dialog.setMinimumWidth(400)
+        
+        layout = QVBoxLayout(dialog)
+        
+        # Formulario
+        form_layout = QFormLayout()
+        
+        barcode_input = QLineEdit(product_data["barcode"])
+        
+        name_input = QLineEdit(product_data["name"])
+        
+        description_input = QLineEdit()  # En un sistema real, se cargaría del producto
+        
+        category_combo = QComboBox()
+        category_combo.addItem("Seleccione una categoría", None)
+        
+        # En un sistema real, cargaríamos las categorías desde el controlador
+        category_combo.addItem("Bebidas", 1)
+        category_combo.addItem("Alimentos", 2)
+        category_combo.addItem("Lácteos", 3)
+        category_combo.addItem("Limpieza", 4)
+        category_combo.addItem("Higiene Personal", 5)
+        
+        # Seleccionar la categoría actual
+        category_index = category_combo.findText(product_data["category"])
+        if category_index >= 0:
+            category_combo.setCurrentIndex(category_index)
+        
+        price_input = QDoubleSpinBox()
+        price_input.setPrefix("$")
+        price_input.setMaximum(99999.99)
+        price_input.setDecimals(2)
+        price_input.setValue(product_data["price"])
+        
+        cost_input = QDoubleSpinBox()
+        cost_input.setPrefix("$")
+        cost_input.setMaximum(99999.99)
+        cost_input.setDecimals(2)
+        cost_input.setValue(product_data["cost"])
+        
+        min_stock_input = QSpinBox()
         min_stock_input.setMinimum(1)
         min_stock_input.setMaximum(999)
         min_stock_input.setValue(5)  # En un sistema real, se cargaría del producto
@@ -672,7 +795,7 @@ self.category_filter_combo.currentIndexChanged.connect(self.filter_products)
         # Para demostración, usamos datos de ejemplo
         product_data = None
         for row in range(self.products_table.rowCount()):
-            if self.products_table.item(row, 0).text() == str(product_id):
+            if int(self.products_table.item(row, 0).text()) == product_id:
                 product_data = {
                     "product_id": product_id,
                     "name": self.products_table.item(row, 2).text(),
@@ -799,7 +922,7 @@ self.category_filter_combo.currentIndexChanged.connect(self.filter_products)
         # Obtener nombre del producto
         product_name = ""
         for row in range(self.products_table.rowCount()):
-            if self.products_table.item(row, 0).text() == str(product_id):
+            if int(self.products_table.item(row, 0).text()) == product_id:
                 product_name = self.products_table.item(row, 2).text()
                 break
                 
@@ -1044,9 +1167,8 @@ self.category_filter_combo.currentIndexChanged.connect(self.filter_products)
             quantity = quantity_spin.value()
             reference = reference_input.text()
             notes = notes_input.text()
-            
-            # Ajustar la cantidad según el tipo de movimiento
-            if movement_type in ["sale", "adjustment"] and not movement_type in ["purchase", "return"]:
+
+            if movement_type in ["sale", "adjustment"]:
                 quantity = -quantity
             
             # En un sistema real, invocaríamos al controlador para registrar el movimiento

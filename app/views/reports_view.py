@@ -1310,7 +1310,8 @@ class ReportsView(QWidget):
             self,
             "Reporte Exportado",
             f"El reporte ha sido exportado correctamente a {file_path}"
-        )self,# app/views/reports_view.py
+        )
+        self,# app/views/reports_view.py
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, 
                               QPushButton, QLabel, QDateEdit, QComboBox,
                               QTableWidget, QTableWidgetItem, QHeaderView,
@@ -1557,4 +1558,9 @@ class ReportsView(QWidget):
         
         # Widget para cuando no hay reporte generado
         no_report_widget = QWidget()
-        no_report_layout = QVBoxLayout(no_report_widget
+        no_report_layout = QVBoxLayout(no_report_widget)
+        no_report_label = QLabel("Configure los filtros y haga clic en 'Generar Reporte' para visualizar.")
+        no_report_label.setAlignment(Qt.AlignCenter)
+        no_report_layout.addWidget(no_report_label)
+        self.inventory_report_widget.addWidget(no_report_widget)
+        
